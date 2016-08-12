@@ -1,0 +1,67 @@
+<html>  
+  <head>  
+        <meta charset="utf-8">  
+        <title>饼状图</title>  
+  </head> 
+
+<style>
+
+
+</style>
+    <body>  
+		<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>  
+        <script>
+		
+		var width = 400;
+		var height = 400;
+		var dataset = [ 30 , 10 , 43 , 55 , 13 ];
+		
+		var svg = d3.select("body")
+					.append("svg")
+					.attr("width", width)
+					.attr("height", height);
+		
+		/////布局（数据转换）
+		var pie = d3.layout.pie();//定义一个布局，返回值赋给变量 pie，此时 pie 可以当做函数使用。
+		var piedata = pie(dataset);//将数组 dataset 作为 pie() 的参数，返回值给 piedata。如此一来，piedata 就是转换后的数据。
+		
+		var outerRadius = 150;	//外半径
+		var innerRadius = 80;	//内半径，为0则中间没有空白
+
+		var arc = d3.svg.arc()	//弧生成器
+					.innerRadius(innerRadius)	//设置内半径
+					.outerRadius(outerRadius);	//设置外半径
+		
+		var color = d3.scale.category10();	//color 是一个有十种颜色的颜色比例尺，它能根据传入的索引号获取相应的颜色值
+		
+		var arcs = svg.selectAll("g")
+					  .data(piedata)
+					  .enter()
+					  .append("g")
+					  .attr("transform","translate("+ (width/2) +","+ (width/2) +")");
+					  
+		arcs.append("path")			//因为 arcs 是同时选择了 5 个 <g> 元素的选择集，所以调用 append(“path”) 后，每个 <g> 中都有 <path> 
+			.attr("fill",function(d,i){
+				return color(i);
+			})
+			.attr("d",function(d){	//路径值的属性名称是 d，调用弧生成器后返回的值赋值给它。
+				return arc(d);	//注意，arc(d) 的参数 d 是被绑定的数据。
+			});
+		
+		//在每一个弧线中心添加文本。
+		arcs.append("text")
+			.attr("transform",function(d){
+				return "translate(" + arc.centroid(d) + ")";	//arc.centroid(d) 能算出弧线的中心
+			})
+			.attr("text-anchor","middle")
+			.text(function(d){
+				return d.data;	//要注意，这里返回的是 d.data ，而不是 d 。因为被绑定的数据是对象，里面有 d.startAngle、d.endAngle、d.data 等，其中 d.data 才是转换前的整数的值。
+			});
+		
+		console.log(dataset);
+		console.log(piedata);
+		  
+        </script>  
+		
+    </body>  
+</html>  
